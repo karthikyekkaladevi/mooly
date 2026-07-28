@@ -14,8 +14,13 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 export function getAppSettings(db: Database.Database): AppSettings {
   const raw = getSetting(db, SETTINGS_KEY);
-  if (!raw) return DEFAULT_SETTINGS;
-  return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } as AppSettings;
+  if (!raw) return structuredClone(DEFAULT_SETTINGS);
+  try {
+    return { ...structuredClone(DEFAULT_SETTINGS), ...JSON.parse(raw) } as AppSettings;
+  } catch (error) {
+    console.warn('[settingsStore] failed to parse stored app settings, falling back to defaults', error);
+    return structuredClone(DEFAULT_SETTINGS);
+  }
 }
 
 export function setAppSettings(db: Database.Database, partial: Partial<AppSettings>): AppSettings {

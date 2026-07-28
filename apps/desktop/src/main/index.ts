@@ -1,15 +1,25 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'node:path';
 import { openDatabase, initSchema, createSession, endSession } from '@mooly/storage';
 import { getAppSettings, setAppSettings } from './settingsStore';
 import { startPipeline } from './pipeline';
+import type Database from 'better-sqlite3';
 import type { AppSettings } from '@mooly/shared-types';
 
 export let overlayWindow: BrowserWindow | null = null;
 export let settingsWindow: BrowserWindow | null = null;
 
-const db = openDatabase(join(app.getPath('userData'), 'mooly.db'));
-initSchema(db);
+let db: Database.Database;
+try {
+  db = openDatabase(join(app.getPath('userData'), 'mooly.db'));
+  initSchema(db);
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  dialog.showErrorBox('Mooly failed to start', message);
+  app.quit();
+  // `app.quit()` is asynchronous; make sure nothing below this module scope runs.
+  throw error;
+}
 
 function createWindow(entry: 'overlay' | 'settings', options: Electron.BrowserWindowConstructorOptions) {
   const win = new BrowserWindow({

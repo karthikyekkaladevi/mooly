@@ -9,6 +9,7 @@
     "dev": "electron-vite dev",
     "prebuild": "node scripts/predev.cjs",
     "build": "electron-vite build",
+    "prestart": "node scripts/predev.cjs",
     "start": "electron-vite preview"
   },
   "dependencies": {

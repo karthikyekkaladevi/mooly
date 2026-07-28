@@ -28,23 +28,31 @@ export function startPipeline(
   const transcriptBuffer: TranscriptChunk[] = [];
 
   const interval = setInterval(async () => {
-    const newChunks = audioCapture.pullTranscript();
-    for (const chunk of newChunks) {
-      transcriptBuffer.push(chunk);
-      insertTranscriptEntry(db, { sessionId, ...chunk });
+    try {
+      const newChunks = audioCapture.pullTranscript();
+      for (const chunk of newChunks) {
+        transcriptBuffer.push(chunk);
+        insertTranscriptEntry(db, { sessionId, ...chunk });
+      }
+
+      const screenSnapshot = await screenCapture.captureSnapshot();
+      const prompt = assembleContext(transcriptBuffer, screenSnapshot, styleProfile);
+
+      let fullText = '';
+      for await (const textChunk of provider.streamMessage(prompt)) {
+        fullText += textChunk;
+        if (!overlayWindow.isDestroyed()) {
+          overlayWindow.webContents.send('suggestion:chunk', { text: textChunk, done: false });
+        }
+      }
+      if (!overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send('suggestion:chunk', { text: '', done: true });
+      }
+
+      insertSuggestion(db, { sessionId, timestamp: Date.now(), text: fullText.trim() });
+    } catch (error) {
+      console.error('[pipeline] tick failed, skipping this cycle', error);
     }
-
-    const screenSnapshot = await screenCapture.captureSnapshot();
-    const prompt = assembleContext(transcriptBuffer, screenSnapshot, styleProfile);
-
-    let fullText = '';
-    for await (const textChunk of provider.streamMessage(prompt)) {
-      fullText += textChunk;
-      overlayWindow.webContents.send('suggestion:chunk', { text: textChunk, done: false });
-    }
-    overlayWindow.webContents.send('suggestion:chunk', { text: '', done: true });
-
-    insertSuggestion(db, { sessionId, timestamp: Date.now(), text: fullText.trim() });
   }, TICK_INTERVAL_MS);
 
   return () => {
