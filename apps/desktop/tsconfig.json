@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["vite/client"]
+  },
+  "include": ["src/renderer", "src/preload"],
+  "references": [
+    { "path": "../../packages/shared-types" },
+    { "path": "../../packages/capture" },
+    { "path": "../../packages/context" },
+    { "path": "../../packages/providers" },
+    { "path": "../../packages/personalization" },
+    { "path": "../../packages/storage" }
+  ]
+}

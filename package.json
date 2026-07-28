@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm --filter desktop dev",
     "build": "pnpm --filter desktop build",
+    "pretest": "node scripts/pretest.js",
     "test": "vitest run",
     "postinstall": "node scripts/postinstall.js"
   },
