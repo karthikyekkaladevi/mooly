@@ -1,4 +1,21 @@
+import { useEffect, useRef, useState } from 'react';
+
 export default function App() {
+  const [suggestion, setSuggestion] = useState('Waiting for the first suggestion…');
+  const streaming = useRef(false);
+
+  useEffect(() => {
+    const unsubscribe = window.mooly.onSuggestionChunk(({ text, done }) => {
+      if (done) {
+        streaming.current = false;
+        return;
+      }
+      setSuggestion((prev) => (streaming.current ? prev + text : text));
+      streaming.current = true;
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <div
       className="w-full h-full rounded-xl bg-black/70 text-white text-sm flex flex-col"
@@ -12,7 +29,7 @@ export default function App() {
         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
         Recording (stub)
       </div>
-      <div className="px-2 pb-2 flex-1 overflow-hidden">Mooly overlay — hello world</div>
+      <div className="px-2 pb-2 flex-1 overflow-y-auto">{suggestion}</div>
     </div>
   );
 }

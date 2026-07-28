@@ -1,7 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'node:path';
-import { openDatabase, initSchema } from '@mooly/storage';
+import { openDatabase, initSchema, createSession, endSession } from '@mooly/storage';
 import { getAppSettings, setAppSettings } from './settingsStore';
+import { startPipeline } from './pipeline';
 import type { AppSettings } from '@mooly/shared-types';
 
 export let overlayWindow: BrowserWindow | null = null;
@@ -57,6 +58,14 @@ app.whenReady().then(() => {
     width: 480,
     height: 520,
     title: 'Mooly Settings'
+  });
+
+  const sessionId = createSession(db, Date.now());
+  const stopPipeline = startPipeline(db, sessionId, overlayWindow);
+
+  app.on('before-quit', () => {
+    stopPipeline();
+    endSession(db, sessionId, Date.now());
   });
 
   ipcMain.on('overlay:hover', (_event, hovering: boolean) => {
