@@ -4,7 +4,18 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [
+      externalizeDepsPlugin({
+        exclude: [
+          '@mooly/shared-types',
+          '@mooly/capture',
+          '@mooly/context',
+          '@mooly/providers',
+          '@mooly/personalization',
+          '@mooly/storage'
+        ]
+      })
+    ],
     build: {
       rollupOptions: {
         input: { index: resolve(__dirname, 'src/main/index.ts') }
