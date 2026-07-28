@@ -6,12 +6,12 @@
     "dev": "pnpm --filter desktop dev",
     "build": "pnpm --filter desktop build",
     "test": "vitest run",
-    "postinstall": "electron-rebuild -f -w better-sqlite3 --module-dir apps/desktop"
+    "postinstall": "node scripts/postinstall.js"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
     "vitest": "^2.1.0",
     "@types/node": "^22.5.0",
-    "@electron/rebuild": "^3.6.0"
+    "@electron/rebuild": "3.6.0"
   }
 }
