@@ -36,7 +36,15 @@ export default defineConfig({
     ],
     build: {
       rollupOptions: {
-        input: { index: resolve(__dirname, 'src/preload/index.ts') }
+        input: { index: resolve(__dirname, 'src/preload/index.ts') },
+        // Electron's preload loader only supports CommonJS, regardless of file
+        // extension — without this, Vite emits ESM (`import ...`) here because
+        // apps/desktop's package.json has "type": "module", and Electron then
+        // fails with "Cannot use import statement outside a module".
+        output: {
+          format: 'cjs',
+          entryFileNames: '[name].js'
+        }
       }
     }
   },
