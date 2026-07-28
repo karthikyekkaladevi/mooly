@@ -1,5 +1,8 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'node:path';
+
+export let overlayWindow: BrowserWindow | null = null;
+export let settingsWindow: BrowserWindow | null = null;
 
 function createWindow(entry: 'overlay' | 'settings', options: Electron.BrowserWindowConstructorOptions) {
   const win = new BrowserWindow({
@@ -21,7 +24,7 @@ function createWindow(entry: 'overlay' | 'settings', options: Electron.BrowserWi
 }
 
 app.whenReady().then(() => {
-  createWindow('overlay', {
+  overlayWindow = createWindow('overlay', {
     width: 360,
     height: 160,
     transparent: true,
@@ -31,11 +34,16 @@ app.whenReady().then(() => {
     hasShadow: false,
     skipTaskbar: true
   });
+  overlayWindow.setIgnoreMouseEvents(true, { forward: true });
 
-  createWindow('settings', {
+  settingsWindow = createWindow('settings', {
     width: 480,
     height: 520,
     title: 'Mooly Settings'
+  });
+
+  ipcMain.on('overlay:hover', (_event, hovering: boolean) => {
+    overlayWindow?.setIgnoreMouseEvents(!hovering, { forward: true });
   });
 });
 

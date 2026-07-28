@@ -1,3 +1,5 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
-contextBridge.exposeInMainWorld('mooly', {});
+contextBridge.exposeInMainWorld('mooly', {
+  reportOverlayHover: (hovering: boolean) => ipcRenderer.send('overlay:hover', hovering)
+});

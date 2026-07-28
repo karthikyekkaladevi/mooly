@@ -2,6 +2,8 @@ export {};
 
 declare global {
   interface Window {
-    mooly: Record<string, never>;
+    mooly: {
+      reportOverlayHover: (hovering: boolean) => void;
+    };
   }
 }
